@@ -1,19 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { TrendingUp, Plus, Filter } from "lucide-react";
-import PostCard from "../components/PostCard";
-import CommunityCard from "../components/CommunityCard";
+
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
-  const [posts, setPosts] = useState([]);
-  const [communities, setCommunities] = useState([]);
+  
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState("newest");
-  const [timeframe, setTimeframe] = useState("all");
+  
 
   const fetchData = useCallback(async () => {
     try {
