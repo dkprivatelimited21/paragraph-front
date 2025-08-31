@@ -21,43 +21,44 @@ const Post = () => {
   const [isCommenting, setIsCommenting] = useState(false);
   const [sortBy, setSortBy] = useState('top');
 
-  useEffect(() => {
-    fetchPost();
-  }, [postId]);
-
-  useEffect(() => {
-    if (post) {
-      fetchComments();
+  const fetchPost = useCallback(async () => {
+  try {
+    const response = await api.get(`/posts/${postId}`);
+    setPost(response.data.post);
+  } catch (error) {
+    if (error.response?.status === 404) {
+      toast.error("Post not found");
+      navigate("/");
+    } else {
+      toast.error("Failed to load post");
     }
-  }, [post, sortBy]);
+  } finally {
+    setLoading(false);
+  }
+}, [postId, navigate]);
 
-  const fetchPost = async () => {
-    try {
-      const response = await api.get(`/posts/${postId}`);
-      setPost(response.data.post);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        toast.error('Post not found');
-        navigate('/');
-      } else {
-        toast.error('Failed to load post');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchComments = useCallback(async () => {
+  try {
+    setCommentsLoading(true);
+    const response = await api.get(`/comments/post/${postId}?sort=${sortBy}`);
+    setComments(response.data.comments);
+  } catch (error) {
+    toast.error("Failed to load comments");
+  } finally {
+    setCommentsLoading(false);
+  }
+}, [postId, sortBy]);
 
-  const fetchComments = async () => {
-    try {
-      setCommentsLoading(true);
-      const response = await api.get(`/comments/post/${postId}?sort=${sortBy}`);
-      setComments(response.data.comments);
-    } catch (error) {
-      toast.error('Failed to load comments');
-    } finally {
-      setCommentsLoading(false);
-    }
-  };
+useEffect(() => {
+  fetchPost();
+}, [fetchPost]);
+
+useEffect(() => {
+  if (post) {
+    fetchComments();
+  }
+}, [post, sortBy, fetchComments]);
+
 
   const handleComment = async (e) => {
     e.preventDefault();

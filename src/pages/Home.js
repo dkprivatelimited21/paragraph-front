@@ -15,26 +15,27 @@ const Home = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [timeframe, setTimeframe] = useState('all');
 
-  useEffect(() => {
-    fetchData();
-  }, [sortBy, timeframe]);
+  const fetchData = useCallback(async () => {
+  try {
+    setLoading(true);
+    const [postsRes, communitiesRes] = await Promise.all([
+      api.get(`/posts?sort=${sortBy}&timeframe=${timeframe}&limit=20`),
+      api.get("/communities?sort=trending&limit=5")
+    ]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [postsRes, communitiesRes] = await Promise.all([
-        api.get(`/posts?sort=${sortBy}&timeframe=${timeframe}&limit=20`),
-        api.get('/communities?sort=trending&limit=5')
-      ]);
-      
-      setPosts(postsRes.data.posts);
-      setCommunities(communitiesRes.data.communities);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setPosts(postsRes.data.posts);
+    setCommunities(communitiesRes.data.communities);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    setLoading(false);
+  }
+}, [sortBy, timeframe]);
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]);
+
 
   if (loading) {
     return <LoadingSpinner />;

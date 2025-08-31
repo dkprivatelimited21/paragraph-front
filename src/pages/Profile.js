@@ -10,9 +10,7 @@ import {
   Users,
   Settings,
   ExternalLink,
-  Star,
-  TrendingUp,
-  Clock
+  Star
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import PostCard from '../components/PostCard';
@@ -41,63 +39,52 @@ const Profile = () => {
 
   const isOwnProfile = currentUser && currentUser.username === username;
 
-  useEffect(() => {
-    fetchProfile();
-  }, [username]);
+  const fetchProfile = useCallback(async () => {
+  try {
+    setLoading(true);
+    const response = await api.get(`/users/${username}`);
+    setProfile(response.data.user);
 
-  useEffect(() => {
-    if (profile) {
-      fetchUserContent();
+    setStats({
+      totalPosts: response.data.recentPosts.length,
+      totalComments: response.data.recentComments.length,
+      totalUpvotes: response.data.user.karma || 0,
+      joinedCommunities: response.data.user.communities?.length || 0
+    });
+  } catch (error) {
+    if (error.response?.status === 404) {
+      toast.error("User not found");
+      navigate("/");
+    } else {
+      toast.error("Failed to load profile");
     }
-  }, [profile, activeTab]);
+  } finally {
+    setLoading(false);
+  }
+}, [username, navigate]);
 
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/users/${username}`);
-      setProfile(response.data.user);
-      
-      // Calculate stats
-      setStats({
-        totalPosts: response.data.recentPosts.length,
-        totalComments: response.data.recentComments.length,
-        totalUpvotes: response.data.user.karma || 0,
-        joinedCommunities: response.data.user.communities?.length || 0
-      });
-    } catch (error) {
-      if (error.response?.status === 404) {
-        toast.error('User not found');
-        navigate('/');
-      } else {
-        toast.error('Failed to load profile');
-      }
-    } finally {
-      setLoading(false);
+const fetchUserContent = useCallback(async () => {
+  try {
+    switch (activeTab) {
+      case "posts":
+        const postsRes = await api.get(`/posts?author=${profile._id}&limit=20`);
+        setPosts(postsRes.data.posts);
+        break;
+      case "comments":
+        const commentsRes = await api.get(`/comments/user/${profile._id}?limit=20`);
+        setComments(commentsRes.data.comments);
+        break;
+      case "communities":
+        setCommunities(profile.communities || []);
+        break;
+      default:
+        break;
     }
-  };
+  } catch (error) {
+    console.error("Error fetching user content:", error);
+  }
+}, [activeTab, profile]);
 
-  const fetchUserContent = async () => {
-    try {
-      switch (activeTab) {
-        case 'posts':
-          const postsRes = await api.get(`/posts?author=${profile._id}&limit=20`);
-          setPosts(postsRes.data.posts);
-          break;
-        case 'comments':
-          const commentsRes = await api.get(`/comments/user/${profile._id}?limit=20`);
-          setComments(commentsRes.data.comments);
-          break;
-        case 'communities':
-          // Communities are already in the profile data
-          setCommunities(profile.communities || []);
-          break;
-        default:
-          break;
-      }
-    } catch (error) {
-      console.error('Error fetching user content:', error);
-    }
-  };
 
   const getKarmaColor = (karma) => {
     if (karma >= 10000) return 'text-purple-600';
