@@ -1,16 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import {
-  MapPin,
-  Calendar,
-  Trophy,
-  MessageSquare,
-  FileText,
-  Users,
-  Settings,
-  ExternalLink,
-  Star,
-} from "lucide-react";
+import { MapPin, Calendar, Settings } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import PostCard from "../components/PostCard";
 import LoadingSpinner from "../components/LoadingSpinner";

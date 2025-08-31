@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
-  Hash, 
-  FileText, 
+  Hash,  
   Plus, 
   X, 
   AlertCircle, 
   Check,
   Palette,
-  Globe,
   Lock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
