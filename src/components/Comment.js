@@ -8,7 +8,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const Comment = ({ comment, depth = 0, onReply }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [votes, setVotes] = useState({
     upvotes: comment.upvotes,
     downvotes: comment.downvotes,

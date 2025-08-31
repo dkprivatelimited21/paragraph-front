@@ -8,7 +8,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const PostCard = ({ post, detailed = false }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [votes, setVotes] = useState({
     upvotes: post.upvotes,
     downvotes: post.downvotes,
