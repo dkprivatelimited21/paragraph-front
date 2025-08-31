@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { formatDistanceToNow } from "date-fns";
 
 const Community = () => {
   const { communityName } = useParams();

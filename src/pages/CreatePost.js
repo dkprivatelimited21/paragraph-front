@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const CreatePost = () => {
   const { communityName } = useParams();

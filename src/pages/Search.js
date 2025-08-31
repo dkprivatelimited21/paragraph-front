@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate  } from 'react-router-dom';
 import { Search, Users, FileText, Hash } from 'lucide-react';
 import PostCard from '../components/PostCard';
 import CommunityCard from '../components/CommunityCard';
@@ -50,6 +50,8 @@ const SearchPage = () => {
       setLoading(false);
     }
   };
+
+const navigate = useNavigate();
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
