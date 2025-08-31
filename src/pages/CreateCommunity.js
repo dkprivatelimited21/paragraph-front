@@ -15,7 +15,7 @@ import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const CreateCommunity = () => {
-  const { user } = useAuth();
+
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
