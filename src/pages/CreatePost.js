@@ -1,81 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FileText, Eye } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { FileText, Eye } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import toast from "react-hot-toast";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const CreatePost = () => {
   const { communityName } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [community, setCommunity] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    tags: ''
+    title: "",
+    content: "",
+    tags: ""
   });
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
   const [communityLoading, setCommunityLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCommunity();
-  }, [communityName]);
-
-  const fetchCommunity = async () => {
+  const fetchCommunity = useCallback(async () => {
     try {
       const response = await api.get(`/communities/${communityName}`);
       setCommunity(response.data.community);
-      
+
       if (!response.data.community.isMember) {
-        toast.error('You must join this community to post');
+        toast.error("You must join this community to post");
         navigate(`/c/${communityName}`);
       }
     } catch (error) {
-      toast.error('Community not found');
-      navigate('/');
+      toast.error("Community not found");
+      navigate("/");
     } finally {
       setCommunityLoading(false);
     }
-  };
+  }, [communityName, navigate]);
+
+  useEffect(() => {
+    fetchCommunity();
+  }, [fetchCommunity]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.content.trim()) {
-      toast.error('Title and content are required');
+      toast.error("Title and content are required");
       return;
     }
 
     setLoading(true);
     try {
       const tags = formData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
 
-      const response = await api.post('/posts', {
+      const response = await api.post("/posts", {
         title: formData.title,
         content: formData.content,
         communityId: community._id,
         tags
       });
 
-      toast.success('Post created successfully!');
+      toast.success("Post created successfully!");
       navigate(`/post/${response.data.post._id}`);
     } catch (error) {
-      toast.error('Failed to create post');
+      toast.error("Failed to create post");
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
@@ -132,14 +131,16 @@ const CreatePost = () => {
                 className="flex items-center space-x-1 text-sm text-primary-600 hover:text-primary-700"
               >
                 <Eye className="w-4 h-4" />
-                <span>{showPreview ? 'Edit' : 'Preview'}</span>
+                <span>{showPreview ? "Edit" : "Preview"}</span>
               </button>
             </div>
 
             {showPreview ? (
               <div className="w-full min-h-[200px] p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700">
                 <div className="prose dark:prose-invert max-w-none">
-                  <ReactMarkdown>{formData.content || '*Preview will appear here...*'}</ReactMarkdown>
+                  <ReactMarkdown>
+                    {formData.content || "*Preview will appear here...*"}
+                  </ReactMarkdown>
                 </div>
               </div>
             ) : (
@@ -188,11 +189,13 @@ const CreatePost = () => {
             </button>
             <button
               type="submit"
-              disabled={loading || !formData.title.trim() || !formData.content.trim()}
+              disabled={
+                loading || !formData.title.trim() || !formData.content.trim()
+              }
               className="flex items-center space-x-2 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <FileText className="w-4 h-4" />
-              <span>{loading ? 'Creating...' : 'Create Post'}</span>
+              <span>{loading ? "Creating..." : "Create Post"}</span>
             </button>
           </div>
         </form>

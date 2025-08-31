@@ -1,42 +1,40 @@
 import React, { useState, useEffect, useCallback } from "react";
-
-import { Link } from 'react-router-dom';
-import { TrendingUp, Plus, Filter } from 'lucide-react';
-import PostCard from '../components/PostCard';
-import CommunityCard from '../components/CommunityCard';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { Link } from "react-router-dom";
+import { TrendingUp, Plus, Filter } from "lucide-react";
+import PostCard from "../components/PostCard";
+import CommunityCard from "../components/CommunityCard";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
   const [posts, setPosts] = useState([]);
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('newest');
-  const [timeframe, setTimeframe] = useState('all');
+  const [sortBy, setSortBy] = useState("newest");
+  const [timeframe, setTimeframe] = useState("all");
 
   const fetchData = useCallback(async () => {
-  try {
-    setLoading(true);
-    const [postsRes, communitiesRes] = await Promise.all([
-      api.get(`/posts?sort=${sortBy}&timeframe=${timeframe}&limit=20`),
-      api.get("/communities?sort=trending&limit=5")
-    ]);
+    try {
+      setLoading(true);
+      const [postsRes, communitiesRes] = await Promise.all([
+        api.get(`/posts?sort=${sortBy}&timeframe=${timeframe}&limit=20`),
+        api.get("/communities?sort=trending&limit=5")
+      ]);
 
-    setPosts(postsRes.data.posts);
-    setCommunities(communitiesRes.data.communities);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  } finally {
-    setLoading(false);
-  }
-}, [sortBy, timeframe]);
+      setPosts(postsRes.data.posts);
+      setCommunities(communitiesRes.data.communities);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [sortBy, timeframe]);
 
-useEffect(() => {
-  fetchData();
-}, [fetchData]);
-
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -52,7 +50,7 @@ useEffect(() => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
               Home Feed
             </h1>
-            
+
             {isAuthenticated && (
               <Link
                 to="/c/general/submit"
@@ -68,7 +66,9 @@ useEffect(() => {
           <div className="flex flex-wrap gap-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Sort by:
+              </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -82,7 +82,9 @@ useEffect(() => {
             </div>
 
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Time:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Time:
+              </span>
               <select
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value)}
@@ -100,9 +102,7 @@ useEffect(() => {
           {/* Posts */}
           <div className="space-y-4">
             {posts.length > 0 ? (
-              posts.map(post => (
-                <PostCard key={post._id} post={post} />
-              ))
+              posts.map((post) => <PostCard key={post._id} post={post} />)
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500 dark:text-gray-400">No posts found</p>
@@ -130,7 +130,7 @@ useEffect(() => {
               </h2>
             </div>
             <div className="space-y-3">
-              {communities.map(community => (
+              {communities.map((community) => (
                 <CommunityCard key={community._id} community={community} compact />
               ))}
             </div>

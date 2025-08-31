@@ -1,28 +1,27 @@
-import React, { useState, useEffect, useCallback } from "react";
-
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  MapPin, 
-  Globe, 
-  Calendar, 
-  Trophy, 
-  MessageSquare, 
+import React, { useState, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
+  MapPin,
+  Globe,
+  Calendar,
+  Trophy,
+  MessageSquare,
   FileText,
   Users,
   Settings,
   ExternalLink,
   Star
-} from 'lucide-react';
-import { formatDistanceToNow, format } from 'date-fns';
-import PostCard from '../components/PostCard';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import toast from 'react-hot-toast';
+} from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns";
+import PostCard from "../components/PostCard";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import toast from "react-hot-toast";
 
 const Profile = () => {
   const { username } = useParams();
-  const { user: currentUser, isAuthenticated } = useAuth();
+  const { user: currentUser } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
@@ -30,7 +29,7 @@ const Profile = () => {
   const [comments, setComments] = useState([]);
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('posts');
+  const [activeTab, setActiveTab] = useState("posts");
   const [stats, setStats] = useState({
     totalPosts: 0,
     totalComments: 0,
@@ -41,73 +40,64 @@ const Profile = () => {
   const isOwnProfile = currentUser && currentUser.username === username;
 
   const fetchProfile = useCallback(async () => {
-  try {
-    setLoading(true);
-    const response = await api.get(`/users/${username}`);
-    setProfile(response.data.user);
+    try {
+      setLoading(true);
+      const response = await api.get(`/users/${username}`);
+      setProfile(response.data.user);
 
-    setStats({
-      totalPosts: response.data.recentPosts.length,
-      totalComments: response.data.recentComments.length,
-      totalUpvotes: response.data.user.karma || 0,
-      joinedCommunities: response.data.user.communities?.length || 0
-    });
-  } catch (error) {
-    if (error.response?.status === 404) {
-      toast.error("User not found");
-      navigate("/");
-    } else {
-      toast.error("Failed to load profile");
+      setStats({
+        totalPosts: response.data.recentPosts.length,
+        totalComments: response.data.recentComments.length,
+        totalUpvotes: response.data.user.karma || 0,
+        joinedCommunities: response.data.user.communities?.length || 0
+      });
+    } catch (error) {
+      if (error.response?.status === 404) {
+        toast.error("User not found");
+        navigate("/");
+      } else {
+        toast.error("Failed to load profile");
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-}, [username, navigate]);
+  }, [username, navigate]);
 
-const fetchUserContent = useCallback(async () => {
-  try {
-    switch (activeTab) {
-      case "posts":
-        const postsRes = await api.get(`/posts?author=${profile._id}&limit=20`);
-        setPosts(postsRes.data.posts);
-        break;
-      case "comments":
-        const commentsRes = await api.get(`/comments/user/${profile._id}?limit=20`);
-        setComments(commentsRes.data.comments);
-        break;
-      case "communities":
-        setCommunities(profile.communities || []);
-        break;
-      default:
-        break;
+  const fetchUserContent = useCallback(async () => {
+    try {
+      switch (activeTab) {
+        case "posts":
+          const postsRes = await api.get(
+            `/posts?author=${profile._id}&limit=20`
+          );
+          setPosts(postsRes.data.posts);
+          break;
+        case "comments":
+          const commentsRes = await api.get(
+            `/comments/user/${profile._id}?limit=20`
+          );
+          setComments(commentsRes.data.comments);
+          break;
+        case "communities":
+          setCommunities(profile.communities || []);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error("Error fetching user content:", error);
     }
-  } catch (error) {
-    console.error("Error fetching user content:", error);
-  }
-}, [activeTab, profile]);
+  }, [activeTab, profile]);
 
+  React.useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
-  const getKarmaColor = (karma) => {
-    if (karma >= 10000) return 'text-purple-600';
-    if (karma >= 5000) return 'text-yellow-600';
-    if (karma >= 1000) return 'text-blue-600';
-    if (karma >= 100) return 'text-green-600';
-    return 'text-gray-600';
-  };
-
-  const getKarmaLabel = (karma) => {
-    if (karma >= 10000) return 'Legend';
-    if (karma >= 5000) return 'Expert';
-    if (karma >= 1000) return 'Veteran';
-    if (karma >= 100) return 'Active';
-    return 'Newcomer';
-  };
-
-  const tabs = [
-    { id: 'posts', label: 'Posts', icon: FileText, count: stats.totalPosts },
-    { id: 'comments', label: 'Comments', icon: MessageSquare, count: stats.totalComments },
-    { id: 'communities', label: 'Communities', icon: Users, count: stats.joinedCommunities }
-  ];
+  React.useEffect(() => {
+    if (profile) {
+      fetchUserContent();
+    }
+  }, [profile, activeTab, fetchUserContent]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -125,6 +115,7 @@ const fetchUserContent = useCallback(async () => {
       </div>
     );
   }
+
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
